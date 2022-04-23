@@ -1,0 +1,44 @@
+body{
+    margin: 0px;
+}
+
+body > div{
+    padding: 8px;
+}
+
+#site_title{
+    font-weight: bold;
+    text-decoration: none;
+    color: red;
+    font-size: large;
+}
+
+#title{
+    text-align: center;
+    font-weight: bold;
+    color: black;
+}
+
+#header{
+    background-color: #f6f8fa;
+    text-align: center;
+}
+
+.note{
+    color: gray;
+}
+
+#content{
+    border-top-style: solid;
+    border-top-color: lightgray;
+    border-top-width: 1px;
+}
+
+#main{
+    background-color: #f6f8fa;
+    border-radius: 1em;
+    border-color: lightgrey;
+    border-style: solid;
+    border-width: 1px;
+    margin: 1em;
+}
