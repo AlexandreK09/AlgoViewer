@@ -1,0 +1,192 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AlgoViewer</title>
+    <link href="./style.css" rel="stylesheet">
+</head>
+<body>
+    <div id="header">
+        <a href="./index.html" id="site_title">Algo Viewer</a>
+    </div>
+
+    <div id="main">
+        <div id="title">
+            <p>
+                Bubble Sort
+            </p>
+        </div>
+        <div id="description">
+            Bubble Sort is one of the simplest sorting algorithm, but it has a really bad time complexity.
+            <details>
+                <summary>
+                    details
+                </summary>
+                The algorithm is simple and pretty intuitive.<br />
+                We traverse the list, comparing every adjacent pair in the list, if it is not in the correct order, we swap the two value.<br />
+                When we arrive at the end of the list we know that the last element is at the right place.<br />
+                Then we simply repeat the same process on the list without the last element.<br />
+                <br />
+                Time complexity: Θ(n<sup>2</sup>) <br />
+                Space complexity: Θ(1) (in place) <br />
+            </details>
+        </div>
+        <div id="content">
+            <input type="number" min="0" max="100" id="value_selector"/>
+            <button onclick="renderer.add()">add</button>
+            <button onclick="renderer.remove()">remove</button>
+            <button onclick="renderer.fillRandom()">random</button>
+            <div id="renderer">
+
+            </div>
+            <button onclick="renderer.start()">start</button>
+            <button onclick="renderer.previous()">previous</button>
+            <button onclick="renderer.step()">step</button>
+            <button onclick="renderer.end()">end</button>
+            <br />
+            <input type="range" min="0" max="1000" step="10" name="delay" id="delay_selector" oninput="updateDelayDisplay()"/> 
+            <label for="delay" id="delay_display">delay (ms)</label>
+            <button onclick="renderer.play()">play</button>
+        </div>
+    </div>
+</body>
+
+<script>
+    var array = [];
+    var delayDisplay = document.getElementById("delay_display");
+
+    var renderer = {};
+    renderer.div = document.getElementById("renderer");
+    renderer.valueSelector = document.getElementById("value_selector");
+    renderer.delaySelector = document.getElementById("delay_selector");
+
+    function updateDelayDisplay(){
+        delayDisplay.innerHTML = "delay :" + renderer.delaySelector.valueAsNumber + " (ms)";
+    }
+
+    function getSteps(){
+        let result = [];
+        let list = Array.from(array);
+        let length = list.length;
+        for(let i = 0; i<length; i++){
+            for(let j = 1; j<=length-i-1; j++){
+                if(list[j] < list[j-1]){
+                    let step = {list: Array.from(list), color1: j, color2: j-1, pos: j, last: length-i, finished: false};
+                    step.message = list[j]+" < "+list[j-1]+", swapping them..."
+                    result.push(step);
+
+                    let temp = list[j];
+                    list[j] = list[j-1];
+                    list[j-1] = temp;
+                    let step2 = {list: Array.from(list), color1: j, color2: j-1, pos: j, last: length-i, finished: false, message: "swapped "+list[j]+" and "+list[j-1]+"."}
+                    result.push(step2);
+                }else{
+                    let step = {list: Array.from(list), color1: j, color2: j-1, pos: j, last: length-i, finished: false};
+                    step.message = list[j]+" >= "+list[j-1]+", continuing."
+                    result.push(step);
+                }
+            }
+        }
+        result.push({list: Array.from(list), finished: true, message: "Finished !"});
+        return result;
+    }
+
+    renderer.steps = getSteps();
+    renderer.actualStep = 0;
+
+    renderer.render = function(){
+        let step = this.steps[this.actualStep];
+        
+        while(this.div.childNodes.length != 0){
+            let child = this.div.childNodes[0];
+            this.div.removeChild(child);
+        }
+
+        let messageNode = document.createElement("p");
+        messageNode.innerHTML = step.message;
+        this.div.appendChild(messageNode);
+
+        let container = document.createElement("div");
+        container.className = "arrayContainer";
+        this.div.appendChild(container);
+
+        for(let i = 0; i<step.list.length; i++){
+            let cell = document.createElement("div");
+            cell.innerHTML = step.list[i];
+            cell.className = "square";
+
+            if(step.finished || i >= step.last){
+                cell.className += " green";
+            }else if(i == step.color1){
+                cell.className += " yellow";
+            }else if(i == step.color2){
+                cell.className += " orange";
+            }
+
+            container.appendChild(cell);
+        }
+    }
+
+    renderer.addValue = function(n){
+        array.push(n);
+        this.actualStep = 0;
+        this.steps = getSteps();
+        this.render();
+    }
+
+    renderer.add = function(){
+        this.addValue(this.valueSelector.valueAsNumber);
+    }
+
+    renderer.remove = function(){
+        array.pop();
+        this.actualStep = 0;
+        this.steps = getSteps();
+        this.render();
+    }
+
+    renderer.fillRandom = function(){
+        array = [];
+        for(let i = 0; i<10; i++){
+            let rand = Math.floor(Math.random()*100);
+            array.push(rand);
+        }
+        this.actualStep = 0;
+        this.steps = getSteps();
+        this.render();
+    }
+
+    renderer.step = function(){
+        if(this.actualStep+1 != this.steps.length){
+            this.actualStep++;
+            this.render();
+        }
+    }
+
+    renderer.previous = function(){
+        if(this.actualStep>0){
+            this.actualStep--;
+            this.render();
+        }
+    }
+
+    renderer.start = function(){
+        this.actualStep = 0;
+        this.render();
+    }
+
+    renderer.end = function(){
+        this.actualStep = this.steps.length-1;
+        this.render();
+    }
+
+    renderer.play = function(){
+        if (this.actualStep != this.steps.length-1){
+            this.step();
+            setTimeout(() => this.play(), this.delaySelector.valueAsNumber);
+        }
+    }
+
+    renderer.render();
+</script>
+
+</html>

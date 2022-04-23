@@ -6,6 +6,20 @@ body > div{
     padding: 8px;
 }
 
+details{
+    border-color: darkgray;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 1em;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    padding-left: 8px;
+}
+
+.note{
+    color: gray;
+}
+
 #site_title{
     font-weight: bold;
     text-decoration: none;
@@ -24,14 +38,11 @@ body > div{
     text-align: center;
 }
 
-.note{
-    color: gray;
-}
-
 #content{
     border-top-style: solid;
     border-top-color: lightgray;
     border-top-width: 1px;
+    padding-top: 8px;
 }
 
 #main{
@@ -41,4 +52,31 @@ body > div{
     border-style: solid;
     border-width: 1px;
     margin: 1em;
+    align-content: center;
+}
+
+.arrayContainer{
+    display: flex;
+    justify-content: space-around;
+    width: 80%;
+    margin: auto;
+    flex-wrap: wrap;
+}
+
+.square{
+    border: black;
+    border-style: solid;
+    border-width: 1px;
+}
+
+.orange{
+    background-color: orange;
+}
+
+.yellow{
+    background-color: yellow;
+}
+
+.green{
+    background-color: lightgreen;
 }
