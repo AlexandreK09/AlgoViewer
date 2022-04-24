@@ -25,13 +25,17 @@
                 We traverse the list, comparing every adjacent pair in the list, if it is not in the correct order, we swap the two value.<br />
                 When we arrive at the end of the list we know that the last element is at the right place.<br />
                 Then we simply repeat the same process on the list without the last element.<br />
+                <br>
+                Optimization:<br />
+                If during one iteration we did not swap any element then the list is sorted so we can stop the algorithm<br />
+
                 <br />
                 Time complexity: Θ(n<sup>2</sup>) <br />
                 Space complexity: Θ(1) (in place) <br />
             </details>
         </div>
         <div id="content">
-            <input type="number" min="0" max="100" id="value_selector"/>
+            <input type="number" min="0" max="100" id="value_selector" value="0"/>
             <button onclick="renderer.add()">add</button>
             <button onclick="renderer.remove()">remove</button>
             <button onclick="renderer.fillRandom()">random</button>
@@ -45,7 +49,8 @@
             <br />
             <input type="range" min="0" max="1000" step="10" name="delay" id="delay_selector" oninput="updateDelayDisplay()"/> 
             <label for="delay" id="delay_display">delay (ms)</label>
-            <button onclick="renderer.play()">play</button>
+            <button onclick="renderer.startAnimation()">play</button>
+            <button onclick="renderer.paused = true">pause</button>
         </div>
     </div>
 </body>
@@ -68,6 +73,7 @@
         let list = Array.from(array);
         let length = list.length;
         for(let i = 0; i<length; i++){
+            let swapped = false
             for(let j = 1; j<=length-i-1; j++){
                 if(list[j] < list[j-1]){
                     let step = {list: Array.from(list), color1: j, color2: j-1, pos: j, last: length-i, finished: false};
@@ -79,11 +85,16 @@
                     list[j-1] = temp;
                     let step2 = {list: Array.from(list), color1: j, color2: j-1, pos: j, last: length-i, finished: false, message: "swapped "+list[j]+" and "+list[j-1]+"."}
                     result.push(step2);
+
+                    swapped = true;
                 }else{
                     let step = {list: Array.from(list), color1: j, color2: j-1, pos: j, last: length-i, finished: false};
                     step.message = list[j]+" >= "+list[j-1]+", continuing."
                     result.push(step);
                 }
+            }
+            if(!swapped){
+                break;
             }
         }
         result.push({list: Array.from(list), finished: true, message: "Finished !"});
@@ -105,6 +116,12 @@
         messageNode.innerHTML = step.message;
         this.div.appendChild(messageNode);
 
+        if(!step.finished){
+            let messageNode2 = document.createElement("p");
+            messageNode2.innerHTML = "pos: "+ step.pos+", end: "+(step.last-1);
+            this.div.appendChild(messageNode2);
+        }
+
         let container = document.createElement("div");
         container.className = "arrayContainer";
         this.div.appendChild(container);
@@ -124,6 +141,10 @@
 
             container.appendChild(cell);
         }
+
+        let stepCounter = document.createElement("p");
+        stepCounter.innerHTML = "step: "+(this.actualStep+1)+"/"+this.steps.length
+        this.div.appendChild(stepCounter);
     }
 
     renderer.addValue = function(n){
@@ -180,10 +201,15 @@
     }
 
     renderer.play = function(){
-        if (this.actualStep != this.steps.length-1){
+        if (this.actualStep != this.steps.length-1 && !this.paused){
             this.step();
             setTimeout(() => this.play(), this.delaySelector.valueAsNumber);
         }
+    }
+
+    renderer.startAnimation = function(){
+        this.paused = false;
+        this.play();
     }
 
     renderer.render();
