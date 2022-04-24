@@ -1,0 +1,249 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AlgoViewer</title>
+    <link href="./style.css" rel="stylesheet">
+</head>
+<body>
+    <div id="header">
+        <a href="./index.html" id="site_title">Algo Viewer</a>
+    </div>
+
+    <div id="main">
+        <div id="title">
+            <p>
+                Selection Sort
+            </p>
+        </div>
+        <div id="description">
+            The Selection Sort is a really simple algorithm but because of its time complexity it is rarely used.
+            <details>
+                <summary>
+                    details
+                </summary>
+                The algorithms search for the minimum of the unsorted list then put at at the beginning of the list then repeat the same process with the remaining elements<br />
+                <span class="note">Note: this algorithms does the minimum possible number of swap</span><br />
+                <br />
+                Time complexity: Θ(n<sup>2</sup>) <br />
+                Space complexity: Θ(1) (in place) <br />
+            </details>
+        </div>
+        <div id="content">
+            <input type="number" min="0" max="100" id="value_selector" value="0"/>
+            <button onclick="renderer.add()">add</button>
+            <button onclick="renderer.remove()">remove</button>
+            <button onclick="renderer.fillRandom()">random</button>
+            <div id="renderer">
+
+            </div>
+            <button onclick="renderer.start()">start</button>
+            <button onclick="renderer.previous()">previous</button>
+            <button onclick="renderer.step()">step</button>
+            <button onclick="renderer.end()">end</button>
+            <br />
+            <input type="range" min="0" max="1000" step="10" name="delay" id="delay_selector" oninput="updateDelayDisplay()"/> 
+            <label for="delay" id="delay_display">delay (ms)</label>
+            <button onclick="renderer.startAnimation()">play</button>
+            <button onclick="renderer.paused = true">pause</button>
+        </div>
+    </div>
+</body>
+
+<script>
+    var array = [];
+    var delayDisplay = document.getElementById("delay_display");
+
+    var renderer = {};
+    renderer.div = document.getElementById("renderer");
+    renderer.valueSelector = document.getElementById("value_selector");
+    renderer.delaySelector = document.getElementById("delay_selector");
+
+    function updateDelayDisplay(){
+        delayDisplay.innerHTML = "delay :" + renderer.delaySelector.valueAsNumber + " (ms)";
+    }
+
+    function getSteps(){
+        let list = Array.from(array);
+        let start = 0;
+        let result = [];
+        
+        while(start < list.length-1){
+            let minIndex = null;
+            for(let i = start; i < list.length; i++){
+                if(minIndex == null){
+                    let step = {};
+                    step.list = Array.from(list);
+                    step.min = minIndex;
+                    step.start = start;
+                    step.actual = i;
+                    step.message = "setting minIndex to "+i;
+
+                    minIndex = i;
+                    result.push(step);
+                }else{
+                    if(list[i] < list[minIndex]){
+                        let step = {};
+                        step.list = Array.from(list);
+                        step.min = minIndex;
+                        step.start = start;
+                        step.actual = i;
+                        step.message = list[i] +" < "+list[minIndex]+", updating minIndex...";
+                        result.push(step);
+
+                        minIndex = i;
+
+                        let step2 = {};
+                        step2.list = Array.from(list);
+                        step2.min = minIndex;
+                        step2.start = start;
+                        step2.actual = i;
+                        step2.message = "updated minIndex.";
+                        result.push(step2); 
+                    }else{
+                        let step = {};
+                        step.list = Array.from(list);
+                        step.min = minIndex;
+                        step.start = start;
+                        step.actual = i;
+                        step.message = list[i] +" >= "+list[minIndex]+", continuing...";
+                        result.push(step);
+                    }
+                }
+            }
+
+            if(minIndex != start){
+                let step = {};
+                step.list = Array.from(list);
+                step.min = minIndex;
+                step.start = start;
+                step.actual = start;
+                step.message = "swapping minimum with start of the list";
+                result.push(step);
+
+                let temp = list[start];
+                list[start] = list[minIndex];
+                list[minIndex] = temp;
+            }
+
+            start++;
+        }
+
+        result.push({list: Array.from(list), finished: true, message: "Finished !"});
+        return result;
+    }
+
+    renderer.steps = getSteps();
+    renderer.actualStep = 0;
+
+    renderer.render = function(){
+        let step = this.steps[this.actualStep];
+        
+        while(this.div.childNodes.length != 0){
+            let child = this.div.childNodes[0];
+            this.div.removeChild(child);
+        }
+
+        let messageNode = document.createElement("p");
+        messageNode.innerHTML = step.message;
+        this.div.appendChild(messageNode);
+
+        if(!step.finished){
+            let messageNode2 = document.createElement("p");
+            messageNode2.innerHTML = "start: " + step.start + ", actual position: "+ step.actual + ", minIndex: "+step.min;
+            this.div.appendChild(messageNode2);
+        }
+
+        let stepCounter = document.createElement("p");
+        stepCounter.innerHTML = "step: "+(this.actualStep+1)+"/"+this.steps.length
+        this.div.appendChild(stepCounter);
+
+        let container = document.createElement("div");
+        container.className = "arrayContainer";
+        this.div.appendChild(container);
+
+        for(let i = 0; i<step.list.length; i++){
+            let cell = document.createElement("div");
+            cell.innerHTML = step.list[i];
+            cell.className = "square";
+
+            if(step.finished || i < step.start){
+                cell.className += " green";
+            }else if(i == step.actual && i != step.min){
+                cell.className += " yellow";
+            }else if(i == step.min){
+                cell.className += " orange";
+            }
+
+            container.appendChild(cell);
+        }
+    }
+
+    renderer.addValue = function(n){
+        array.push(n);
+        this.actualStep = 0;
+        this.steps = getSteps();
+        this.render();
+    }
+
+    renderer.add = function(){
+        this.addValue(this.valueSelector.valueAsNumber);
+    }
+
+    renderer.remove = function(){
+        array.pop();
+        this.actualStep = 0;
+        this.steps = getSteps();
+        this.render();
+    }
+
+    renderer.fillRandom = function(){
+        array = [];
+        for(let i = 0; i<10; i++){
+            let rand = Math.floor(Math.random()*100);
+            array.push(rand);
+        }
+        this.actualStep = 0;
+        this.steps = getSteps();
+        this.render();
+    }
+
+    renderer.step = function(){
+        if(this.actualStep+1 != this.steps.length){
+            this.actualStep++;
+            this.render();
+        }
+    }
+
+    renderer.previous = function(){
+        if(this.actualStep>0){
+            this.actualStep--;
+            this.render();
+        }
+    }
+
+    renderer.start = function(){
+        this.actualStep = 0;
+        this.render();
+    }
+
+    renderer.end = function(){
+        this.actualStep = this.steps.length-1;
+        this.render();
+    }
+
+    renderer.play = function(){
+        if (this.actualStep != this.steps.length-1 && !this.paused){
+            this.step();
+            setTimeout(() => this.play(), this.delaySelector.valueAsNumber);
+        }
+    }
+
+    renderer.startAnimation = function(){
+        this.paused = false;
+        this.play();
+    }
+
+    renderer.render();
+</script>
+
+</html>
