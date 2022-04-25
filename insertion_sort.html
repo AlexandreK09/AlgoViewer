@@ -12,17 +12,18 @@
     <div id="main">
         <div id="title">
             <p>
-                Selection Sort
+                Insertion Sort
             </p>
         </div>
         <div id="description">
-            The Selection Sort algorithm is a really simple algorithm but because of its time complexity it is rarely used.
+            Insertion Sort is a pretty simple sorting algorithm but it has a bad time complexity.
             <details>
                 <summary>
                     details
                 </summary>
-                The algorithms search for the minimum of the unsorted list then put at at the beginning of the list then repeat the same process with the remaining elements<br />
-                <span class="note">Note: this algorithms does the minimum possible number of swap</span><br />
+                For the algorithm, the list is splitted in two part, the first part is sorted and the second part is the part that is not sorted yet.<br />
+                The algorithm works by inserting one element form the unsorted part into the sorted one until there is no unsorted element.<br />
+                To insert an element, the algorithm place the element at the end of the sorted list and swap it with the element before it until it is bigger than the element before it.<br /> 
                 <br />
                 Time complexity: Θ(n<sup>2</sup>) <br />
                 Space complexity: Θ(1) (in place) <br />
@@ -64,71 +65,41 @@
 
     function getSteps(){
         let list = Array.from(array);
-        let start = 0;
         let result = [];
         
-        while(start < list.length-1){
-            let minIndex = null;
-            for(let i = start; i < list.length; i++){
-                if(minIndex == null){
-                    let step = {};
-                    step.list = Array.from(list);
-                    step.min = minIndex;
-                    step.start = start;
-                    step.actual = i;
-                    step.message = "setting minIndex to "+i;
+        for(let i = 1; i<list.length; i++){
+            let j = i;
+            while(j > 0 && list[j]<list[j-1]){
+                let step1 = {};
+                step1.list = Array.from(list);
+                step1.i = i;
+                step1.j = j;
+                step1.message = list[j] + " < " + list[j-1] + ", swapping them..."
+                result.push(step1);
+                
+                let temp = list[j];
+                list[j] = list[j-1];
+                list[j-1] = temp;
+                j--;
 
-                    minIndex = i;
-                    result.push(step);
-                }else{
-                    if(list[i] < list[minIndex]){
-                        let step = {};
-                        step.list = Array.from(list);
-                        step.min = minIndex;
-                        step.start = start;
-                        step.actual = i;
-                        step.message = list[i] +" < "+list[minIndex]+", updating minIndex...";
-                        result.push(step);
-
-                        minIndex = i;
-
-                        let step2 = {};
-                        step2.list = Array.from(list);
-                        step2.min = minIndex;
-                        step2.start = start;
-                        step2.actual = i;
-                        step2.message = "updated minIndex.";
-                        result.push(step2); 
-                    }else{
-                        let step = {};
-                        step.list = Array.from(list);
-                        step.min = minIndex;
-                        step.start = start;
-                        step.actual = i;
-                        step.message = list[i] +" >= "+list[minIndex]+", continuing...";
-                        result.push(step);
-                    }
-                }
+                let step2 = {};
+                step2.list = Array.from(list);
+                step2.i = i;
+                step2.j = j;
+                step2.message = "Swapped";
+                result.push(step2); 
             }
-
-            if(minIndex != start){
-                let step = {};
-                step.list = Array.from(list);
-                step.min = minIndex;
-                step.start = start;
-                step.actual = start;
-                step.message = "swapping minimum with start of the list";
-                result.push(step);
-
-                let temp = list[start];
-                list[start] = list[minIndex];
-                list[minIndex] = temp;
+            if(j > 0){
+                let step1 = {};
+                step1.list = Array.from(list);
+                step1.i = i;
+                step1.j = j;
+                step1.message = list[j] + " >= " + list[j-1] + ", continuing..."
+                result.push(step1);
             }
-
-            start++;
         }
-
-        result.push({list: Array.from(list), finished: true, message: "Finished !"});
+        
+        result.push({list: Array.from(list), finished: true, message: "Finished !"})
         return result;
     }
 
@@ -137,7 +108,7 @@
 
     renderer.render = function(){
         let step = this.steps[this.actualStep];
-        
+
         while(this.div.childNodes.length != 0){
             let child = this.div.childNodes[0];
             this.div.removeChild(child);
@@ -146,12 +117,6 @@
         let messageNode = document.createElement("p");
         messageNode.innerHTML = step.message;
         this.div.appendChild(messageNode);
-
-        if(!step.finished){
-            let messageNode2 = document.createElement("p");
-            messageNode2.innerHTML = "start: " + step.start + ", actual position: "+ step.actual + ", minIndex: "+step.min;
-            this.div.appendChild(messageNode2);
-        }
 
         let container = document.createElement("div");
         container.className = "arrayContainer";
@@ -162,12 +127,12 @@
             cell.innerHTML = step.list[i];
             cell.className = "square";
 
-            if(step.finished || i < step.start){
+            if(step.finished){
                 cell.className += " green";
-            }else if(i == step.actual && i != step.min){
-                cell.className += " yellow";
-            }else if(i == step.min){
+            }else if(i == step.j || i == step.j-1){
                 cell.className += " orange";
+            }else if(i == step.i){
+                cell.className += " yellow";
             }
 
             container.appendChild(cell);
